@@ -1,11 +1,6 @@
 import sys
 import os
-import pandas as pd
-
-# Преобразовываем признаки текстовые в числовые, меняем типы,
-# сохраняем файл в stage3
-
-# & C:/Python311/python.exe f:/Local/URFU_L/Python/MLOP_II_M_1_scripts/data_scripts/4_change_text_to_numeric.py data/stage2/train.csv
+import io
 
 if len(sys.argv) != 2:
     sys.stderr.write("Arguments error. Usage:\n")
@@ -13,23 +8,31 @@ if len(sys.argv) != 2:
     sys.exit(1)
 
 f_input = sys.argv[1]
+f_output = os.path.join("data", "stage3", "train.csv")
 os.makedirs(os.path.join("data", "stage3"), exist_ok=True)
 
-# забираем датасет для обработки
-df = pd.read_csv(f_input)
+def process_data(fd_in, fd_out):
+    arr_survived = []
+    arr_pclass = []
+    arr_sex = []
+    arr_age = []
 
-# Удалим признаки, которые не оказывают значитального влияния на модель обучения
-df.drop([
-"YrSold", "MSSubClass", "LotConfig", "RoofStyle", "HouseStyle", "LotShape",
-"Exterior1st", "Exterior2nd", "BsmtFullBath", "BedroomAbvGr", "HalfBath",
-"BsmtFinType2", "MoSold", "YrSold"
-],
-axis=1, inplace=True)
+    for line in fd_in:
+        line = line.rstrip('\n').split(',')
+        arr_survived.append(line[0])
+        arr_pclass.append(line[1])
+        arr_sex.append(line[2])
+        arr_age.append(line[3])
 
-# заменим текстовые признаки на числовые
-df["SaleCondition"] = pd.factorize(df["SaleCondition"])[0]
-df["SaleType"] = pd.factorize(df["SaleType"])[0]
-df["Condition1"] = pd.factorize(df["Condition1"])[0]
+    for i in range(len(arr_sex)):
+        if arr_sex[i] == 'male':
+            arr_sex[i] = 1
+        else:
+            arr_sex[i] = 0
 
+    for p_survived, p_pclass, p_sex, p_age in zip(arr_survived, arr_pclass, arr_sex, arr_age):
+        fd_out.write("{},{},{},{}\n".format(p_survived, p_pclass, p_sex, p_age))
 
-df.to_csv("data/stage3/train.csv", index=False)
+with io.open(f_input, encoding="utf8") as fd_in:
+    with io.open(f_output, "w", encoding="utf8") as fd_out:
+        process_data(fd_in, fd_out)

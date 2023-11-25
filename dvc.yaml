@@ -14,3 +14,10 @@ stages:
     outs:
     - data/stage2
 
+  text-to-numeric:
+    cmd: python3 scripts/data_scripts/change_text_to_numeric.py data/stage2/train.csv
+    deps:
+    - data/stage2/train.csv
+    - scripts/data_scripts/change_text_to_numeric.py
+    outs:
+    - data/stage3
