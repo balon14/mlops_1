@@ -47,5 +47,5 @@ stages:
     - models/model.pkl
     - scripts/model_scripts/evaluate.py
     metrics:
-    - metrics.csv:
+    - evaluate/score.json:
         cache: false
